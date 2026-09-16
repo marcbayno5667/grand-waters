@@ -1,6 +1,4 @@
 import * as React from "react";
-import { API_ENDPOINT } from "../../utils/constants";
-import { SectionLabel, EditableImage } from "../../utils/services";
 import imgE from "@/imports/e.png";
 import {
   ArrowRight,
@@ -9,6 +7,9 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import { API_ENDPOINT } from "../../utils/constants";
+import { SectionLabel, EditableImage } from "../../utils/services";
+import { AddServiceModal } from "./AddService.widget";
 
 interface Service {
   id: number;
@@ -23,6 +24,7 @@ export const Service = (props) => {
   const { isAdmin, setShowModal } = props;
   const [services, setServices] = React.useState<Service[]>([]);
   const [activeSvc, setActiveSvc] = React.useState(-1);
+  const [showAddService, setShowAddService] = React.useState(false);
 
   const updateService = React.useCallback(
     async (
@@ -173,6 +175,51 @@ export const Service = (props) => {
     }
   };
 
+  const addService = async (
+    title: string,
+    description: string,
+    image: File,
+    icon?: File
+  ) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("image", image);
+
+      if (icon) {
+        formData.append("icon", icon);
+      }
+
+      const response = await fetch(`${API_ENDPOINT}/api/services`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to create service");
+      }
+
+      setServices((prev) => {
+        const updated = [...prev, data.service];
+
+        return updated.map((service, index) => ({
+          ...service,
+          num: String(index + 1).padStart(2, "0"),
+        }));
+      });
+
+      alert("Service added successfully!");
+    } catch (error) {
+      console.error("Error adding service:", error);
+      alert("Failed to add service.");
+      throw error;
+    }
+  };
+
   const deleteService = async (serviceId: number) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this service? This cannot be undone."
@@ -245,6 +292,12 @@ export const Service = (props) => {
   return (
     <div className="max-w-5xl mx-auto px-6">
       <SectionLabel text="What We Do" />
+      {showAddService && (
+        <AddServiceModal
+          onClose={() => setShowAddService(false)}
+          onAdd={addService}
+        />
+      )}
       <h2 className="font-black text-3xl lg:text-4xl text-gray-900 mb-10 leading-tight">
         Our Services
       </h2>
@@ -457,6 +510,19 @@ export const Service = (props) => {
           );
         })}
       </div>
+
+      {isAdmin && (
+        <div className="pt-6">
+          <button
+            type="button"
+            onClick={() => setShowAddService(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#1558cb] text-white text-sm font-bold hover:bg-[#1049aa] transition"
+          >
+            <span className="text-lg leading-none">+</span>
+            Add New Service
+          </button>
+        </div>
+      )}
     </div>
   );
 };
