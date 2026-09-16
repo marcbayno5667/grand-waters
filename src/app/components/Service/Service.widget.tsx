@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { API_ENDPOINT } from "../../utils/constants";
 import { SectionLabel, EditableImage } from "../../utils/services";
-import { AddServiceModal } from "./AddService.widget";
+import AddService from "./AddService.widget";
 
 interface Service {
   id: number;
@@ -293,7 +293,7 @@ export const Service = (props) => {
     <div className="max-w-5xl mx-auto px-6">
       <SectionLabel text="What We Do" />
       {showAddService && (
-        <AddServiceModal
+        <AddService
           onClose={() => setShowAddService(false)}
           onAdd={addService}
         />

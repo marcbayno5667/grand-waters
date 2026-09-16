@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Plus } from "lucide-react";
 
-export const AddServiceModal = ({
+export const AddService = ({
   onClose,
   onAdd,
 }: {
@@ -241,3 +241,5 @@ export const AddServiceModal = ({
     </div>
   );
 };
+
+export default AddService

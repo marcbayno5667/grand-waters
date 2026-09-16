@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { API_ENDPOINT } from "./utils/constants";
 import { SectionLabel, EditableImage } from "./utils/services";
-import ServiceComponent from "./components/service/Service.widget";
+import ServiceComponent from "./components/Service/Service.widget";
 
 const NAV_LINKS = ["Home", "Services", "Projects", "About Us"];
 const NAV_HREFS: Record<string, string> = {
