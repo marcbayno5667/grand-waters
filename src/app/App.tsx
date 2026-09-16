@@ -32,6 +32,18 @@ import {
   ImagePlus,
 } from "lucide-react";
 
+type Service = {
+  id: number;
+  title: string;
+  description: string;
+  icon?: string | null;
+  image?: string | null;
+  num: string;
+};
+
+const API_ENDPOINT = "https://grand-waters-backend.vercel.app";
+// const API_ENDPOINT = "http://localhost:3000";
+
 const NAV_LINKS = ["Home", "Services", "Projects", "About Us"];
 const NAV_HREFS: Record<string, string> = {
   Home: "#home",
@@ -40,44 +52,6 @@ const NAV_HREFS: Record<string, string> = {
   "About Us": "#about",
   Contact: "#contact",
 };
-
-const SERVICES = [
-  {
-    num: "01",
-    icon: <Droplets size={22} />,
-    title: "Water Filtration System Installation",
-    desc: "We design and install multi-stage filtration systems tailored to your water source. Our systems effectively remove dirt, sediment, rust, chlorine, and other harmful impurities — ensuring clean, safe water for residential, commercial, and industrial use.",
-    img: imgA,
-  },
-  {
-    num: "02",
-    icon: <Waves size={22} />,
-    title: "Water Softener Installation",
-    desc: "Hard water causes scale buildup in pipes, appliances, and fixtures. Our water softener installations use ion-exchange technology to reduce hardness minerals like calcium and magnesium, extending the life of your equipment and improving water quality.",
-    img: imgD,
-  },
-  {
-    num: "03",
-    icon: <FlaskConical size={22} />,
-    title: "Reverse Osmosis (RO) Systems",
-    desc: "Our RO systems use a semi-permeable membrane to remove up to 99% of dissolved contaminants including heavy metals, bacteria, nitrates, and salts. Ideal for drinking water purification in homes, offices, restaurants, and manufacturing facilities.",
-    img: imgB,
-  },
-  {
-    num: "04",
-    icon: <Shield size={22} />,
-    title: "Water Tank & System Cleaning",
-    desc: "Over time, tanks and pipes accumulate sediment, algae, and bacteria that compromise water quality. We perform thorough cleaning and sanitation of water storage tanks, distribution pipes, and filtration systems to restore safe, hygienic water supply.",
-    img: imgC,
-  },
-  {
-    num: "05",
-    icon: <CheckCircle2 size={22} />,
-    title: "Water Testing & Treatment Consultation",
-    desc: "Not sure what your water needs? Our certified technicians conduct on-site water quality testing to identify contaminants and hardness levels. We then recommend the most effective and cost-efficient treatment system specifically matched to your water profile.",
-    img: imgE,
-  },
-];
 
 const PROJECTS = [
   {
@@ -844,6 +818,7 @@ export default function App() {
   const [selectedProject, setSelectedProject] = useState<
     (typeof PROJECT_GALLERY)[0] | null
   >(null);
+  const [services, setServices] = useState<Service[]>([]);
 
   /* Admin state */
   const [isAdmin, setIsAdmin] = useState(
@@ -860,30 +835,30 @@ export default function App() {
     }
   });
 
-  const [svcOverrides, setSvcOverrides] = useState<
-    Record<number, { title: string; desc: string }>
-  >(() => {
-    try {
-      return JSON.parse(localStorage.getItem("gw_svcs") ?? "{}");
-    } catch {
-      return {};
-    }
-  });
+  // const [svcOverrides, setSvcOverrides] = useState<
+  //   Record<number, { title: string; desc: string }>
+  // >(() => {
+  //   try {
+  //     return JSON.parse(localStorage.getItem("gw_svcs") ?? "{}");
+  //   } catch {
+  //     return {};
+  //   }
+  // });
 
-  const saveSvc = (i: number, field: "title" | "desc", val: string) => {
-    setSvcOverrides((prev) => {
-      const next = {
-        ...prev,
-        [i]: {
-          title: prev[i]?.title ?? SERVICES[i].title,
-          desc: prev[i]?.desc ?? SERVICES[i].desc,
-          [field]: val,
-        },
-      };
-      localStorage.setItem("gw_svcs", JSON.stringify(next));
-      return next;
-    });
-  };
+  // const saveSvc = (i: number, field: "title" | "desc", val: string) => {
+  //   setSvcOverrides((prev) => {
+  //     const next = {
+  //       ...prev,
+  //       [i]: {
+  //         title: prev[i]?.title ?? SERVICES[i].title,
+  //         desc: prev[i]?.desc ?? SERVICES[i].desc,
+  //         [field]: val,
+  //       },
+  //     };
+  //     localStorage.setItem("gw_svcs", JSON.stringify(next));
+  //     return next;
+  //   });
+  // };
 
   const [statsOverrides, setStatsOverrides] = useState<
     Record<number, { value: string; label: string }>
@@ -912,50 +887,43 @@ export default function App() {
 
   const login = async (u: string, p: string) => {
     try {
-      const response = await fetch(
-        "https://grand-waters-backend.vercel.app/api/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: u,
-            password: p,
-          }),
-        }
-      );
+      const response = await fetch(`${API_ENDPOINT}/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: u,
+          password: p,
+        }),
+      });
 
       const loadCoverPhoto = async () => {
         try {
-          const response = await fetch(
-            "https://grand-waters-backend.vercel.app/api/cover-photo",
-            {
-              method: "GET",
-              cache: "no-store",
-            }
-          );
-      
+          const response = await fetch(`${API_ENDPOINT}/api/cover-photo`, {
+            method: "GET",
+            cache: "no-store",
+          });
+
           if (!response.ok) {
             throw new Error(`Cover photo GET failed: ${response.status}`);
           }
-      
+
           // Because the backend redirects to the actual image URL
           const coverUrl = response.url;
-      
+
           console.log("Cover photo URL:", coverUrl);
-      
-          setImgStore(prev => ({
+
+          setImgStore((prev) => ({
             ...prev,
             "hero-bg": `${coverUrl}?t=${Date.now()}`,
           }));
-      
         } catch (error) {
           console.error("Cover photo GET error:", error);
         }
       };
 
-      if (response.ok && data.success) {
+      if (response.ok) {
         localStorage.setItem("gw_admin", "true");
         setIsAdmin(true);
         setShowAdminLogin(false);
@@ -976,105 +944,315 @@ export default function App() {
 
   useEffect(() => {
     idbLoadAll()
-      .then(all => {
+      .then((all) => {
         if (Object.keys(all).length) {
           setImgStore(all);
         }
       })
       .catch(() => {});
-  
+
     const loadCoverPhoto = async () => {
       try {
-        const response = await fetch(
-          "https://grand-waters-backend.vercel.app/api/cover-photo",
-          {
-            method: "GET",
-            cache: "no-store",
-            redirect: "follow",
-          }
-        );
-  
+        const response = await fetch(`${API_ENDPOINT}/api/cover-photo`, {
+          method: "GET",
+          cache: "no-store",
+          redirect: "follow",
+        });
+
         if (!response.ok) {
           throw new Error(`Cover photo GET failed: ${response.status}`);
         }
-  
+
         // Get the actual Supabase URL after the 302 redirect
         const coverUrl = response.url;
-  
+
         console.log("FINAL COVER URL:", coverUrl);
-  
-        setImgStore(prev => ({
+
+        setImgStore((prev) => ({
           ...prev,
           "hero-bg": coverUrl,
         }));
-  
       } catch (error) {
         console.error("Cover photo GET error:", error);
       }
     };
-  
+
     loadCoverPhoto();
   }, []);
 
-  const replaceImage = useCallback(async (id: string, file: File) => {
-    console.log("REPLACE IMAGE CALLED:", id, file.name);
-  
-    if (id === "hero-bg") {
-      console.log("UPLOADING COVER PHOTO...");
-  
+  useEffect(() => {
+    const loadServices = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINT}/api/services`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch services");
+        }
+
+        const data = await response.json();
+
+        const formattedServices: Service[] = data.services.map(
+          (service: Omit<Service, "num">, index: number) => ({
+            ...service,
+            num: String(index + 1).padStart(2, "0"),
+          })
+        );
+
+        setServices(formattedServices);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      }
+    };
+
+    loadServices();
+  }, []);
+
+  const updateService = useCallback(
+    async (
+      serviceId: number,
+      field: "title" | "description",
+      value: string
+    ) => {
       try {
         const formData = new FormData();
-        formData.append("coverPhoto", file);
-  
-        console.log("CALLING POST API...");
-  
+        formData.append(field, value);
+
         const response = await fetch(
-          "https://grand-waters-backend.vercel.app/api/cover-photo",
+          `${API_ENDPOINT}/api/services/${serviceId}`,
           {
-            method: "POST",
+            method: "PATCH",
             body: formData,
           }
         );
-  
-        console.log("POST RESPONSE:", response.status);
-  
+
         const data = await response.json();
-  
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to update service");
+        }
+
+        setServices((prev) =>
+          prev.map((service) =>
+            service.id === serviceId
+              ? {
+                  ...service,
+                  ...data.service,
+                }
+              : service
+          )
+        );
+
+        console.log(`Service ${field} updated successfully`);
+      } catch (error) {
+        console.error(`Failed to update service ${field}:`, error);
+        alert(`Failed to update ${field}.`);
+      }
+    },
+    []
+  );
+
+  const replaceServiceImage = useCallback(
+    async (serviceId: number, file: File) => {
+      try {
+        const formData = new FormData();
+
+        formData.append("image", file);
+
+        const response = await fetch(
+          `${API_ENDPOINT}/api/services/${serviceId}`,
+          {
+            method: "PATCH",
+            body: formData,
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to replace image");
+        }
+
+        setServices((prev) =>
+          prev.map((service) =>
+            service.id === serviceId
+              ? {
+                  ...service,
+                  ...data.service,
+                }
+              : service
+          )
+        );
+
+        console.log("Service image replaced successfully");
+      } catch (error) {
+        console.error("Service image replacement error:", error);
+        alert("Failed to replace service image.");
+      }
+    },
+    []
+  );
+
+  const replaceServiceIcon = async (serviceId: number, file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("icon", file);
+
+      const response = await fetch(
+        `${API_ENDPOINT}/api/services/${serviceId}`,
+        {
+          method: "PATCH",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to replace icon");
+      }
+
+      setServices((prev) =>
+        prev.map((service) =>
+          service.id === serviceId ? { ...service, ...data.service } : service
+        )
+      );
+    } catch (error) {
+      console.error("Error replacing service icon:", error);
+      alert("Failed to replace service icon.");
+    }
+  };
+
+  const removeServiceIcon = async (serviceId: number) => {
+    if (!window.confirm("Remove this service icon?")) {
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("removeIcon", "true");
+
+      const response = await fetch(
+        `${API_ENDPOINT}/api/services/${serviceId}`,
+        {
+          method: "PATCH",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to remove icon");
+      }
+
+      setServices((prev) =>
+        prev.map((service) =>
+          service.id === serviceId ? { ...service, ...data.service } : service
+        )
+      );
+    } catch (error) {
+      console.error("Error removing service icon:", error);
+      alert("Failed to remove service icon.");
+    }
+  };
+
+  const deleteService = async (serviceId: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this service? This cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_ENDPOINT}/api/services/${serviceId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to delete service");
+      }
+
+      // Remove the service from the frontend
+      setServices((prev) => {
+        const updated = prev.filter((service) => service.id !== serviceId);
+
+        // Re-number services
+        return updated.map((service, index) => ({
+          ...service,
+          num: String(index + 1).padStart(2, "0"),
+        }));
+      });
+
+      // Close the service if it was open
+      setActiveSvc(-1);
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      alert("Failed to delete service.");
+    }
+  };
+
+  const replaceImage = useCallback(async (id: string, file: File) => {
+    console.log("REPLACE IMAGE CALLED:", id, file.name);
+
+    if (id === "hero-bg") {
+      console.log("UPLOADING COVER PHOTO...");
+
+      try {
+        const formData = new FormData();
+        formData.append("coverPhoto", file);
+
+        console.log("CALLING POST API...");
+
+        const response = await fetch(`${API_ENDPOINT}/api/cover-photo`, {
+          method: "POST",
+          body: formData,
+        });
+
+        console.log("POST RESPONSE:", response.status);
+
+        const data = await response.json();
+
         console.log("POST DATA:", data);
-  
+
         if (!response.ok || !data.success) {
           throw new Error(data.message || "Upload failed");
         }
-  
-        setImgStore(prev => ({
+
+        setImgStore((prev) => ({
           ...prev,
           "hero-bg": `${data.url}?t=${Date.now()}`,
         }));
-  
+
         console.log("COVER PHOTO UPDATED!");
-  
       } catch (error) {
         console.error("COVER PHOTO UPLOAD ERROR:", error);
         alert("Failed to upload cover photo.");
       }
-  
+
       return;
     }
-  
+
     // Existing behavior for other images
     const reader = new FileReader();
-  
-    reader.onload = e => {
+
+    reader.onload = (e) => {
       const url = e.target?.result as string;
-  
+
       idbSave(id, url).catch(() => {});
-  
-      setImgStore(prev => ({
+
+      setImgStore((prev) => ({
         ...prev,
         [id]: url,
       }));
     };
-  
+
     reader.readAsDataURL(file);
   }, []);
 
@@ -1368,27 +1546,34 @@ export default function App() {
           </h2>
 
           <div className="divide-y divide-gray-100 border-t border-gray-100">
-            {SERVICES.map((s, i) => {
+            {services.map((s, i) => {
               const open = activeSvc === i;
-              const title = svcOverrides[i]?.title ?? s.title;
-              const desc = svcOverrides[i]?.desc ?? s.desc;
-              const imgSrc = imgStore[`svc-${i}`] ?? s.img;
+              const title = s.title;
+              const desc = s.description;
+              const imgSrc = s.image ?? imgE;
+
               return (
-                <div key={s.num}>
+                <div key={s.id}>
                   <button
                     onClick={() => setActiveSvc(open ? -1 : i)}
                     className="w-full text-left flex items-center gap-4 py-5 group"
                   >
                     <div
                       className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                        open
-                          ? "bg-[#1558cb]"
-                          : "bg-gray-100 group-hover:bg-blue-50"
+                        open ? "bg-transparent" : "bg-transparent"
                       }`}
                     >
-                      <span className={open ? "text-white" : "text-[#1558cb]"}>
-                        {s.icon}
-                      </span>
+                      {s.icon ? (
+                        <img
+                          src={s.icon}
+                          alt=""
+                          className="w-6 h-6 object-contain"
+                        />
+                      ) : (
+                        <span className="text-[#1558cb]">
+                          <Droplets size={20} />
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -1430,6 +1615,7 @@ export default function App() {
 
                   {open && (
                     <div className="flex flex-col sm:flex-row gap-5 pb-7 pl-16">
+                      {/* IMAGE */}
                       <div
                         className="sm:w-52 shrink-0 rounded-xl overflow-hidden"
                         style={{ height: "140px" }}
@@ -1441,33 +1627,51 @@ export default function App() {
                           className="w-full h-full object-cover"
                           wrapperClassName="relative group/ei w-full h-full"
                           isAdmin={isAdmin}
-                          store={imgStore}
-                          onReplace={replaceImage}
+                          store={{}}
+                          onReplace={(id, file) =>
+                            replaceServiceImage(s.id, file)
+                          }
                         />
                       </div>
-                      <div className="flex-1">
+
+                      {/* TITLE + DESCRIPTION + SERVICE ICON */}
+                      <div className="flex-1 min-w-0">
+                        {/* YOUR EXISTING TITLE/DESCRIPTION CODE */}
                         {isAdmin ? (
                           <div className="space-y-2">
                             <div>
                               <label className="block text-[10px] font-bold text-[#1558cb] uppercase tracking-widest mb-1">
                                 Service Title
                               </label>
+
                               <input
-                                value={title}
-                                onChange={(e) =>
-                                  saveSvc(i, "title", e.target.value)
+                                defaultValue={s.title}
+                                key={`${s.id}-title-${s.title}`}
+                                onBlur={(e) =>
+                                  updateService(
+                                    s.id,
+                                    "title",
+                                    e.currentTarget.value
+                                  )
                                 }
                                 className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb] transition"
                               />
                             </div>
+
                             <div>
                               <label className="block text-[10px] font-bold text-[#1558cb] uppercase tracking-widest mb-1">
                                 Description
                               </label>
+
                               <textarea
-                                value={desc}
-                                onChange={(e) =>
-                                  saveSvc(i, "desc", e.target.value)
+                                defaultValue={s.description}
+                                key={`${s.id}-description-${s.description}`}
+                                onBlur={(e) =>
+                                  updateService(
+                                    s.id,
+                                    "description",
+                                    e.currentTarget.value
+                                  )
                                 }
                                 rows={4}
                                 className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm text-gray-600 leading-relaxed focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb] transition resize-none"
@@ -1479,6 +1683,7 @@ export default function App() {
                             <p className="text-gray-600 text-sm leading-relaxed">
                               {desc}
                             </p>
+
                             <button
                               onClick={() => setShowModal(true)}
                               className="mt-4 inline-flex items-center gap-2 text-[#1558cb] font-semibold text-sm hover:underline"
@@ -1488,7 +1693,62 @@ export default function App() {
                             </button>
                           </>
                         )}
+
+                        {/* SERVICE ICON — KEEP IT HERE */}
+                        {isAdmin && (
+                          <div className="mt-2 border-t border-gray-100">
+                            <label className="block text-[10px] font-bold text-[#1558cb] uppercase tracking-widest mb-2">
+                              Service Icon
+                            </label>
+
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 text-[#1558cb] text-xs font-bold cursor-pointer hover:bg-blue-100 transition">
+                                <Pencil size={13} />
+                                Replace Icon
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+
+                                    if (file) {
+                                      replaceServiceIcon(s.id, file);
+                                    }
+
+                                    e.currentTarget.value = "";
+                                  }}
+                                />
+                              </label>
+
+                              {s.icon && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeServiceIcon(s.id)}
+                                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 text-gray-600 text-xs font-bold hover:bg-gray-100 transition"
+                                >
+                                  <Trash2 size={13} />
+                                  Remove Icon
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
+
+                      {/* THIRD COLUMN — DELETE ONLY */}
+                      {isAdmin && (
+                        <div className="sm:w-36 shrink-0 flex items-start justify-end">
+                          <button
+                            type="button"
+                            onClick={() => deleteService(s.id)}
+                            className="inline-flex items-center gap-2 px-2 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 transition"
+                          >
+                            <Trash2 size={13} />
+                            Delete Service
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
