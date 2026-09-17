@@ -1,6 +1,6 @@
 import * as React from "react";
 import imgE from "@/imports/e.png";
-import { API_ENDPOINT } from "@/app/utils/constants";
+import { API_ENDPOINT, API_HEADER } from "@/app/utils/constants";
 import { SnackbarType } from "../Snackbar/Snackbar";
 import Snackbar from "../Snackbar/Snackbar.widget";
 
@@ -109,6 +109,7 @@ export const Stat: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
       const response = await fetch(`${API_ENDPOINT}/api/stats/${id}`, {
         method: "PATCH",
         headers: {
+          ...API_HEADER,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

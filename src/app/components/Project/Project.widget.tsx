@@ -1,6 +1,6 @@
 import * as React from "react";
 import { MapPin, Pencil, Trash2, ImagePlus, ArrowRight, X } from "lucide-react";
-import { API_ENDPOINT } from "@/app/utils/constants";
+import { API_ENDPOINT, API_HEADER } from "@/app/utils/constants";
 import { SectionLabel } from "@/app/utils/services";
 import { SnackbarProps } from "../Snackbar/Snackbar";
 import { Snackbar } from "../Snackbar/Snackbar.widget";
@@ -320,6 +320,7 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 
     const response = await fetch(`${API_ENDPOINT}/api/projects`, {
       method: "POST",
+      headers: API_HEADER,
       body: formData,
     });
 
@@ -361,6 +362,7 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
         `${API_ENDPOINT}/api/projects/${updatedProject.id}`,
         {
           method: "PATCH",
+          headers: API_HEADER,
           body: formData,
         }
       );
@@ -399,6 +401,7 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
         `${API_ENDPOINT}/api/projects/${projectId}`,
         {
           method: "DELETE",
+          headers: API_HEADER,
         }
       );
 
@@ -476,6 +479,7 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
         `${API_ENDPOINT}/api/projects/${project.id}`,
         {
           method: "PATCH",
+          headers: API_HEADER,
           body: formData,
         }
       );

@@ -17,12 +17,13 @@ import {
   Lock,
   LogOut,
 } from "lucide-react";
-import { API_ENDPOINT } from "./utils/constants";
+import { API_ENDPOINT, API_HEADER } from "./utils/constants";
 import { SectionLabel, EditableImage } from "./utils/services";
 import { ServiceData } from "./components/Service/Service";
 import ServiceComponent from "./components/Service/Service.widget";
 import ProjectComponent from "./components/Project/Project.widget";
 import StatsComponent from "./components/Stats/Stats.widget";
+import Login from "./components/Login/Login.widget";
 
 const NAV_LINKS = ["Home", "Services", "Projects", "About Us"];
 const NAV_HREFS: Record<string, string> = {
@@ -239,116 +240,6 @@ async function idbLoadAll(): Promise<Record<string, string>> {
   });
 }
 
-/* ── Admin login modal ── */
-function AdminLoginModal({
-  onLogin,
-  onClose,
-}: {
-  onLogin: (u: string, p: string) => Promise<boolean>;
-  onClose: () => void;
-}) {
-  const [u, setU] = React.useState("");
-  const [p, setP] = React.useState("");
-  const [showPw, setShowPw] = React.useState(false);
-  const [err, setErr] = React.useState(false);
-  const overlayRef = React.useRef<HTMLDivElement>(null);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const success = await onLogin(u, p);
-
-    if (!success) {
-      setErr(true);
-      setP("");
-    }
-  };
-
-  return (
-    <div
-      ref={overlayRef}
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-      className="fixed inset-0 z-[200] flex items-center justify-center px-4"
-      style={{ background: "rgba(5,10,28,0.88)", backdropFilter: "blur(8px)" }}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
-        <div className="bg-[#0b1840] px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={logoImg} alt="" className="h-9 w-auto object-contain" />
-            <div>
-              <div className="text-white font-black text-sm">Admin Portal</div>
-              <div className="text-blue-400 text-xs">Grand Waters</div>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <X size={16} />
-          </button>
-        </div>
-        <form onSubmit={submit} className="px-6 py-6 space-y-4">
-          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mx-auto">
-            <Lock size={20} className="text-[#1558cb]" />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-              Username
-            </label>
-            <input
-              autoFocus
-              value={u}
-              onChange={(e) => {
-                setU(e.target.value);
-                setErr(false);
-              }}
-              placeholder="Enter username"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb] transition"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPw ? "text" : "password"}
-                value={p}
-                onChange={(e) => {
-                  setP(e.target.value);
-                  setErr(false);
-                }}
-                placeholder="Enter password"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb] transition pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPw((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-xs"
-              >
-                {showPw ? "Hide" : "Show"}
-              </button>
-            </div>
-          </div>
-          {err && (
-            <p className="text-red-500 text-xs font-medium">
-              Incorrect username or password.
-            </p>
-          )}
-          <button
-            type="submit"
-            className="w-full bg-[#1558cb] hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-sm transition-colors"
-          >
-            Sign In
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 /* ── Admin top bar ── */
 function AdminBar({ onLogout }: { onLogout: () => void }) {
   return (
@@ -383,53 +274,6 @@ export default function App() {
   const [showAdminLogin, setShowAdminLogin] = React.useState(false);
   const [imgStore, setImgStore] = React.useState<Record<string, string>>({});
   const [services, setServices] = React.useState<ServiceData[]>([]);
-
-  const login = async (u: string, p: string) => {
-    try {
-      const response = await fetch(`${API_ENDPOINT}/api/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: u,
-          password: p,
-        }),
-      });
-
-      const loadCoverPhoto = async () => {
-        try {
-          const response = await fetch(`${API_ENDPOINT}/api/cover-photo`, {
-            method: "GET",
-            cache: "no-store",
-          });
-
-          if (!response.ok) {
-            throw new Error(`Cover photo GET failed: ${response.status}`);
-          }
-
-          // Because the backend redirects to the actual image URL
-          const coverUrl = response.url;
-
-          setImgStore((prev) => ({
-            ...prev,
-            "hero-bg": `${coverUrl}?t=${Date.now()}`,
-          }));
-        } catch (error) {}
-      };
-
-      if (response.ok) {
-        localStorage.setItem("gw_admin", "true");
-        setIsAdmin(true);
-        setShowAdminLogin(false);
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      return false;
-    }
-  };
 
   const logout = () => {
     localStorage.removeItem("gw_admin");
@@ -477,6 +321,7 @@ export default function App() {
 
         const response = await fetch(`${API_ENDPOINT}/api/cover-photo`, {
           method: "POST",
+          headers: API_HEADER,
           body: formData,
         });
 
@@ -524,8 +369,9 @@ export default function App() {
       {showModal && <InquiryModal onClose={() => setShowModal(false)} />}
 
       {showAdminLogin && (
-        <AdminLoginModal
-          onLogin={login}
+        <Login
+          setIsAdmin={setIsAdmin}
+          setShowAdminLogin={setShowAdminLogin}
           onClose={() => setShowAdminLogin(false)}
         />
       )}

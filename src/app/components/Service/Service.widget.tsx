@@ -7,7 +7,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { API_ENDPOINT } from "../../utils/constants";
+import { API_ENDPOINT, API_HEADER } from "../../utils/constants";
 import { SectionLabel, EditableImage } from "../../utils/services";
 import { SnackbarProps } from "../Snackbar/Snackbar";
 import Snackbar from "../Snackbar/Snackbar.widget";
@@ -49,6 +49,7 @@ export const Service: React.FC<{
           `${API_ENDPOINT}/api/services/${serviceId}`,
           {
             method: "PATCH",
+            headers: API_HEADER,
             body: formData,
           }
         );
@@ -96,6 +97,7 @@ export const Service: React.FC<{
           `${API_ENDPOINT}/api/services/${serviceId}`,
           {
             method: "PATCH",
+            headers: API_HEADER,
             body: formData,
           }
         );
@@ -142,6 +144,7 @@ export const Service: React.FC<{
         `${API_ENDPOINT}/api/services/${serviceId}`,
         {
           method: "PATCH",
+          headers: API_HEADER,
           body: formData,
         }
       );
@@ -175,6 +178,7 @@ export const Service: React.FC<{
         `${API_ENDPOINT}/api/services/${serviceId}`,
         {
           method: "PATCH",
+          headers: API_HEADER,
           body: formData,
         }
       );
@@ -190,6 +194,11 @@ export const Service: React.FC<{
           service.id === serviceId ? { ...service, ...data.service } : service
         )
       );
+      setSnackbar({
+        open: true,
+        type: "success",
+        message: "Successfully removed icon.",
+      });
     } catch (error) {
       setSnackbar({
         open: true,
@@ -218,6 +227,7 @@ export const Service: React.FC<{
 
       const response = await fetch(`${API_ENDPOINT}/api/services`, {
         method: "POST",
+        headers: API_HEADER,
         body: formData,
       });
 
@@ -257,6 +267,7 @@ export const Service: React.FC<{
         `${API_ENDPOINT}/api/services/${serviceId}`,
         {
           method: "DELETE",
+          headers: API_HEADER,
         }
       );
 
