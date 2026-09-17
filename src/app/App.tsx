@@ -1,9 +1,5 @@
 import React from "react";
 import logoImg from "@/imports/299327617_410754531152643_7181097851927378017_n.jpg";
-import imgA from "@/imports/A.png";
-import imgB from "@/imports/b.png";
-import imgC from "@/imports/c.png";
-import imgD from "@/imports/d.png";
 import imgE from "@/imports/e.png";
 import imgF from "@/imports/f.png";
 import {
@@ -14,20 +10,17 @@ import {
   Shield,
   Send,
   DollarSign,
-  ArrowRight,
   Handshake,
   Timer,
   Menu,
   X,
   Lock,
-  LogOut,
-  Pencil,
-  Trash2,
-  ImagePlus,
+  LogOut
 } from "lucide-react";
 import { API_ENDPOINT } from "./utils/constants";
 import { SectionLabel, EditableImage } from "./utils/services";
 import ServiceComponent from "./components/Service/Service.widget";
+import ProjectComponent from "./components/Project/Project.widget";
 
 const NAV_LINKS = ["Home", "Services", "Projects", "About Us"];
 const NAV_HREFS: Record<string, string> = {
@@ -37,53 +30,6 @@ const NAV_HREFS: Record<string, string> = {
   "About Us": "#about",
   Contact: "#contact",
 };
-
-const PROJECTS = [
-  {
-    category: "FILTRATION",
-    title: "Industrial Filtration System",
-    location: "Luzon",
-    img: imgA,
-    filter: "Filtration",
-  },
-  {
-    category: "RO SYSTEM",
-    title: "RO Membrane System",
-    location: "Visayas",
-    img: imgB,
-    filter: "RO System",
-  },
-  {
-    category: "RO SYSTEM",
-    title: "Outdoor RO Installation",
-    location: "Mindanao",
-    img: imgC,
-    filter: "RO System",
-  },
-  {
-    category: "SOFTENER",
-    title: "Water Softener Tank Setup",
-    location: "Luzon",
-    img: imgD,
-    filter: "Softener",
-  },
-  {
-    category: "FILTRATION",
-    title: "Large-Scale Treatment Plant",
-    location: "Visayas",
-    img: imgE,
-    filter: "Filtration",
-  },
-  {
-    category: "FILTRATION",
-    title: "Multi-Stage Filtration Unit",
-    location: "Mindanao",
-    img: imgF,
-    filter: "Filtration",
-  },
-];
-
-const PROJECT_FILTERS = ["All", "Filtration", "RO System", "Softener"];
 
 const WHY = [
   {
@@ -259,307 +205,6 @@ function InquiryModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-const PROJECT_GALLERY = [
-  {
-    imgs: [imgA, imgB, imgE, imgF],
-    cat: "FILTRATION",
-    title: "Industrial Filtration System",
-    loc: "Luzon",
-    desc: "A heavy-duty multi-stage filtration system installed for a manufacturing plant in Luzon. The system processes large volumes of water daily, removing sediment, rust, and particulates to meet industrial water quality standards. Components include pre-filters, activated carbon stages, and a final polishing membrane.",
-  },
-  {
-    imgs: [imgB, imgC, imgA, imgD],
-    cat: "RO SYSTEM",
-    title: "RO Membrane System",
-    loc: "Visayas",
-    desc: "High-capacity reverse osmosis membrane system deployed for a commercial facility in Visayas. Capable of removing up to 99% of dissolved solids, bacteria, and contaminants, delivering purified water for production processes. Includes automatic flush cycles and real-time TDS monitoring.",
-  },
-  {
-    imgs: [imgC, imgF, imgB, imgE],
-    cat: "RO SYSTEM",
-    title: "Outdoor RO Installation",
-    loc: "Mindanao",
-    desc: "Weatherproof outdoor RO installation designed for a remote facility in Mindanao. Custom-built housing protects the system from the elements while maintaining full operational efficiency year-round. Stainless steel framing and UV-resistant enclosures used throughout.",
-  },
-  {
-    imgs: [imgD, imgA, imgC, imgF],
-    cat: "SOFTENER",
-    title: "Water Softener Tank Setup",
-    loc: "Luzon",
-    desc: "Ion-exchange water softener installation for a residential complex in Luzon experiencing severe hard water issues. The system significantly reduced scale buildup in pipes and appliances, extending equipment lifespan. Includes automated regeneration cycles and a brine tank for minimal maintenance.",
-  },
-  {
-    imgs: [imgE, imgD, imgA, imgB],
-    cat: "FILTRATION",
-    title: "Large-Scale Treatment Plant",
-    loc: "Visayas",
-    desc: "Full-scale water treatment plant built for a commercial estate in Visayas. Integrates pre-filtration, chemical dosing, and UV disinfection stages to deliver consistently safe water across the entire property. Designed to handle peak demand from hundreds of units simultaneously.",
-  },
-  {
-    imgs: [imgF, imgE, imgD, imgC],
-    cat: "FILTRATION",
-    title: "Multi-Stage Filtration Unit",
-    loc: "Mindanao",
-    desc: "Compact multi-stage filtration unit installed for a mid-sized office building in Mindanao. Features sediment, carbon, and polishing filter stages — designed for easy maintenance and long service intervals. Each stage is independently serviceable without system shutdown.",
-  },
-  {
-    imgs: [imgA, imgC, imgF, imgD],
-    cat: "RO SYSTEM",
-    title: "Commercial RO System",
-    loc: "Cebu",
-    desc: "Custom reverse osmosis system installed for a restaurant group in Cebu City. Provides high-purity drinking water and ice for daily operations, ensuring consistent taste and safety standards across all branches. System produces up to 500 liters of purified water per day.",
-  },
-  {
-    imgs: [imgB, imgF, imgC, imgE],
-    cat: "FILTRATION",
-    title: "Residential Filter Setup",
-    loc: "Cebu",
-    desc: "Whole-house filtration system installed for a residential property in Cebu. Addresses local water quality concerns including chlorine, turbidity, and odor — providing clean water at every tap throughout the home. Installation completed in under one day with minimal disruption to the household.",
-  },
-];
-
-function ProjectEditModal({
-  project,
-  onSave,
-  onClose,
-}: {
-  project: (typeof PROJECT_GALLERY)[0];
-  onSave: (updated: (typeof PROJECT_GALLERY)[0]) => void;
-  onClose: () => void;
-}) {
-  const overlayRef = React.useRef<HTMLDivElement>(null);
-  const [form, setForm] = React.useState({
-    title: project.title,
-    loc: project.loc,
-    cat: project.cat,
-    desc: project.desc,
-  });
-  const set =
-    (k: keyof typeof form) =>
-    (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      >
-    ) =>
-      setForm((f) => ({ ...f, [k]: e.target.value }));
-
-  const handleSave = () => {
-    onSave({ ...project, ...form });
-    onClose();
-  };
-
-  return (
-    <div
-      ref={overlayRef}
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-      className="fixed inset-0 z-[110] flex items-center justify-center px-4"
-      style={{ background: "rgba(5,10,25,0.85)", backdropFilter: "blur(6px)" }}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="bg-[#1558cb] px-6 py-4 flex items-center justify-between">
-          <h2 className="text-white font-black text-base">Edit Project</h2>
-          <button
-            onClick={onClose}
-            className="text-blue-200 hover:text-white transition-colors"
-          >
-            <X size={16} />
-          </button>
-        </div>
-        <div className="px-6 py-5 space-y-4">
-          <div>
-            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
-              Title
-            </label>
-            <input
-              value={form.title}
-              onChange={set("title")}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb] transition"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
-                Category
-              </label>
-              <select
-                value={form.cat}
-                onChange={set("cat")}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb] transition"
-              >
-                <option value="FILTRATION">FILTRATION</option>
-                <option value="RO SYSTEM">RO SYSTEM</option>
-                <option value="SOFTENER">SOFTENER</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
-                Location
-              </label>
-              <input
-                value={form.loc}
-                onChange={set("loc")}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb] transition"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
-              Description
-            </label>
-            <textarea
-              value={form.desc}
-              onChange={set("desc")}
-              rows={5}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 leading-relaxed focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb] transition resize-none"
-            />
-          </div>
-          <div className="flex gap-3 pt-1">
-            <button
-              onClick={onClose}
-              className="flex-1 border border-gray-200 text-gray-600 font-bold text-sm py-2.5 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              className="flex-1 bg-[#1558cb] hover:bg-blue-700 text-white font-bold text-sm py-2.5 rounded-lg transition-colors"
-            >
-              Save Changes
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ProjectModal({
-  project,
-  onClose,
-}: {
-  project: (typeof PROJECT_GALLERY)[0];
-  onClose: () => void;
-}) {
-  const overlayRef = React.useRef<HTMLDivElement>(null);
-  const [current, setCurrent] = React.useState(0);
-  const total = project.imgs.length;
-  const prev = () => setCurrent((c) => (c - 1 + total) % total);
-  const next = () => setCurrent((c) => (c + 1) % total);
-
-  return (
-    <div
-      ref={overlayRef}
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-      className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8"
-      style={{ background: "rgba(5,10,25,0.85)", backdropFilter: "blur(6px)" }}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
-        {/* Main photo + controls */}
-        <div className="relative" style={{ height: "300px" }}>
-          {project.imgs.map((img, i) => (
-            <img
-              key={i}
-              src={img}
-              alt={`${project.title} ${i + 1}`}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-400 ${
-                i === current ? "opacity-100" : "opacity-0"
-              }`}
-            />
-          ))}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
-
-          {/* Close */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 flex items-center justify-center text-white transition-colors"
-          >
-            <X size={16} />
-          </button>
-
-          {/* Prev / Next */}
-          <button
-            onClick={prev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 flex items-center justify-center text-white transition-colors"
-          >
-            <ArrowRight size={15} className="rotate-180" />
-          </button>
-          <button
-            onClick={next}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 flex items-center justify-center text-white transition-colors"
-          >
-            <ArrowRight size={15} />
-          </button>
-
-          {/* Title + badge */}
-          <div className="absolute bottom-4 left-5 right-16">
-            <span className="inline-block bg-[#1558cb] text-white text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
-              {project.cat}
-            </span>
-            <h3 className="text-white font-black text-xl leading-tight">
-              {project.title}
-            </h3>
-          </div>
-
-          {/* Dot indicators */}
-          <div className="absolute bottom-4 right-5 flex gap-1.5">
-            {project.imgs.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrent(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                  i === current ? "bg-white" : "bg-white/40"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Thumbnail strip */}
-        <div className="flex gap-2 px-5 pt-4">
-          {project.imgs.map((img, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={`rounded-lg overflow-hidden shrink-0 transition-all ${
-                i === current
-                  ? "ring-2 ring-[#1558cb] opacity-100"
-                  : "opacity-50 hover:opacity-80"
-              }`}
-              style={{ width: 64, height: 48 }}
-            >
-              <img src={img} alt="" className="w-full h-full object-cover" />
-            </button>
-          ))}
-        </div>
-
-        {/* Description */}
-        <div className="px-5 py-4">
-          <div className="flex items-center gap-1.5 text-gray-400 text-xs mb-3">
-            <MapPin size={11} />
-            <span>{project.loc}</span>
-          </div>
-          <p className="text-gray-600 text-sm leading-relaxed">
-            {project.desc}
-          </p>
-          <div className="mt-5 pt-4 border-t border-gray-100 flex justify-end">
-            <button
-              onClick={onClose}
-              className="text-xs font-bold text-[#1558cb] hover:underline"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── IndexedDB image store (avoids localStorage 5 MB quota) ── */
 const IDB_NAME = "gw_image_db";
 const IDB_STORE = "images";
 
@@ -737,24 +382,11 @@ function AdminBar({ onLogout }: { onLogout: () => void }) {
 export default function App() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
-  const [selectedProject, setSelectedProject] = React.useState<
-    (typeof PROJECT_GALLERY)[0] | null
-  >(null);
-
-  /* Admin state */
   const [isAdmin, setIsAdmin] = React.useState(
     () => localStorage.getItem("gw_admin") === "true"
   );
   const [showAdminLogin, setShowAdminLogin] = React.useState(false);
   const [imgStore, setImgStore] = React.useState<Record<string, string>>({});
-  const [projects, setProjects] = React.useState<typeof PROJECT_GALLERY>(() => {
-    try {
-      const s = localStorage.getItem("gw_projects");
-      return s ? JSON.parse(s) : PROJECT_GALLERY;
-    } catch {
-      return PROJECT_GALLERY;
-    }
-  });
 
   const [statsOverrides, setStatsOverrides] = React.useState<
     Record<number, { value: string; label: string }>
@@ -808,14 +440,11 @@ export default function App() {
           // Because the backend redirects to the actual image URL
           const coverUrl = response.url;
 
-          console.log("Cover photo URL:", coverUrl);
-
           setImgStore((prev) => ({
             ...prev,
             "hero-bg": `${coverUrl}?t=${Date.now()}`,
           }));
         } catch (error) {
-          console.error("Cover photo GET error:", error);
         }
       };
 
@@ -828,7 +457,6 @@ export default function App() {
 
       return false;
     } catch (error) {
-      console.error("Login error:", error);
       return false;
     }
   };
@@ -861,15 +489,11 @@ export default function App() {
 
         // Get the actual Supabase URL after the 302 redirect
         const coverUrl = response.url;
-
-        console.log("FINAL COVER URL:", coverUrl);
-
         setImgStore((prev) => ({
           ...prev,
           "hero-bg": coverUrl,
         }));
       } catch (error) {
-        console.error("Cover photo GET error:", error);
       }
     };
 
@@ -877,27 +501,17 @@ export default function App() {
   }, []);
 
   const replaceImage = React.useCallback(async (id: string, file: File) => {
-    console.log("REPLACE IMAGE CALLED:", id, file.name);
-
     if (id === "hero-bg") {
-      console.log("UPLOADING COVER PHOTO...");
-
       try {
         const formData = new FormData();
         formData.append("coverPhoto", file);
-
-        console.log("CALLING POST API...");
 
         const response = await fetch(`${API_ENDPOINT}/api/cover-photo`, {
           method: "POST",
           body: formData,
         });
 
-        console.log("POST RESPONSE:", response.status);
-
         const data = await response.json();
-
-        console.log("POST DATA:", data);
 
         if (!response.ok || !data.success) {
           throw new Error(data.message || "Upload failed");
@@ -907,10 +521,7 @@ export default function App() {
           ...prev,
           "hero-bg": `${data.url}?t=${Date.now()}`,
         }));
-
-        console.log("COVER PHOTO UPDATED!");
       } catch (error) {
-        console.error("COVER PHOTO UPLOAD ERROR:", error);
         alert("Failed to upload cover photo.");
       }
 
@@ -934,60 +545,6 @@ export default function App() {
     reader.readAsDataURL(file);
   }, []);
 
-  const [editingProjectIdx, setEditingProjectIdx] = React.useState<
-    number | null
-  >(null);
-
-  const updateProject = (idx: number, updated: (typeof PROJECT_GALLERY)[0]) => {
-    setProjects((prev) => {
-      const next = prev.map((p, i) => (i === idx ? updated : p));
-      localStorage.setItem("gw_projects", JSON.stringify(next));
-      return next;
-    });
-  };
-
-  const removeProject = (idx: number) => {
-    if (!window.confirm("Remove this project?")) return;
-    setProjects((prev) => {
-      const next = prev.filter((_, i) => i !== idx);
-      localStorage.setItem("gw_projects", JSON.stringify(next));
-      return next;
-    });
-  };
-
-  const addProject = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.click();
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const url = e.target?.result as string;
-        const title =
-          window.prompt("Project title:", "New Project") ?? "New Project";
-        const loc = window.prompt("Location (e.g. Cebu):", "Cebu") ?? "Cebu";
-        const cat =
-          window
-            .prompt(
-              "Category (FILTRATION / RO SYSTEM / SOFTENER):",
-              "FILTRATION"
-            )
-            ?.toUpperCase() ?? "FILTRATION";
-        const desc = window.prompt("Short description:", "") ?? "";
-        const newEntry = { imgs: [url, url, url, url], cat, title, loc, desc };
-        setProjects((prev) => {
-          const next = [...prev, newEntry];
-          localStorage.setItem("gw_projects", JSON.stringify(next));
-          return next;
-        });
-      };
-      reader.readAsDataURL(file);
-    };
-  };
-
   return (
     <div
       style={{ fontFamily: "'Inter', sans-serif" }}
@@ -996,25 +553,14 @@ export default function App() {
       }`}
     >
       {showModal && <InquiryModal onClose={() => setShowModal(false)} />}
-      {selectedProject && (
-        <ProjectModal
-          project={selectedProject}
-          onClose={() => setSelectedProject(null)}
-        />
-      )}
+   
       {showAdminLogin && (
         <AdminLoginModal
           onLogin={login}
           onClose={() => setShowAdminLogin(false)}
         />
       )}
-      {editingProjectIdx !== null && (
-        <ProjectEditModal
-          project={projects[editingProjectIdx]}
-          onSave={(updated) => updateProject(editingProjectIdx, updated)}
-          onClose={() => setEditingProjectIdx(null)}
-        />
-      )}
+
       {isAdmin && <AdminBar onLogout={logout} />}
 
       <div className="bg-[#0b1120] text-gray-500 text-[11px] py-2 px-4">
@@ -1286,103 +832,7 @@ export default function App() {
       </section>
 
       <section id="projects" className="py-20 bg-[#f8f9fb]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-10">
-            <SectionLabel text="Our Work" />
-            <h2 className="font-black text-3xl lg:text-4xl text-gray-900">
-              Projects
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {projects.map((p, i) => {
-              const cover = imgStore[`proj-${i}`] ?? p.imgs[0];
-              return (
-                <div
-                  key={i}
-                  className="relative rounded-xl overflow-hidden group cursor-pointer aspect-square"
-                  onClick={() =>
-                    !isAdmin &&
-                    setSelectedProject({
-                      ...p,
-                      imgs: p.imgs.map(
-                        (img, j) => imgStore[`proj-${i}-${j}`] ?? img
-                      ),
-                    })
-                  }
-                >
-                  <img
-                    src={cover}
-                    alt={p.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute bottom-0 inset-x-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <span className="inline-block bg-[#1558cb] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider mb-1">
-                      {p.cat}
-                    </span>
-                    <p className="text-white font-semibold text-xs leading-tight">
-                      {p.title}
-                    </p>
-                    <div className="flex items-center gap-1 text-gray-300 text-[10px] mt-0.5">
-                      <MapPin size={8} />
-                      {p.loc}
-                    </div>
-                  </div>
-                  {isAdmin && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <label className="flex items-center gap-1.5 bg-white text-gray-900 text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer shadow">
-                        <Pencil size={11} />
-                        Replace Photo
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files?.[0])
-                              replaceImage(`proj-${i}`, e.target.files[0]);
-                          }}
-                        />
-                      </label>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingProjectIdx(i);
-                        }}
-                        className="flex items-center gap-1.5 bg-[#1558cb] hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow transition-colors"
-                      >
-                        <Pencil size={11} />
-                        Edit Details
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeProject(i);
-                        }}
-                        className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow transition-colors"
-                      >
-                        <Trash2 size={11} />
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            {isAdmin && (
-              <button
-                onClick={addProject}
-                className="aspect-square rounded-xl border-2 border-dashed border-gray-300 hover:border-[#1558cb] flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-[#1558cb] transition-colors group/add bg-white"
-              >
-                <ImagePlus
-                  size={26}
-                  className="group-hover/add:scale-110 transition-transform"
-                />
-                <span className="text-xs font-semibold">Add Project</span>
-              </button>
-            )}
-          </div>
-        </div>
+        <ProjectComponent isAdmin={isAdmin}/>
       </section>
 
       <section id="about" className="py-20 bg-white">

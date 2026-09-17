@@ -20,7 +20,7 @@ interface Service {
   num: string;
 }
 
-export const Service = (props) => {
+export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) => void}> = (props) => {
   const { isAdmin, setShowModal } = props;
   const [services, setServices] = React.useState<Service[]>([]);
   const [activeSvc, setActiveSvc] = React.useState(-1);
