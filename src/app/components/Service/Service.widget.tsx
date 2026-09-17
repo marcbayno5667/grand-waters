@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { API_ENDPOINT } from "../../utils/constants";
 import { SectionLabel, EditableImage } from "../../utils/services";
+import { SnackbarProps } from "../Snackbar/Snackbar";
+import Snackbar from "../Snackbar/Snackbar.widget";
 import AddService from "./AddService.widget";
 
 interface Service {
@@ -20,11 +22,25 @@ interface Service {
   num: string;
 }
 
-export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) => void}> = (props) => {
+export const Service: React.FC<{
+  isAdmin: boolean;
+  setShowModal: (show: boolean) => void;
+}> = (props) => {
   const { isAdmin, setShowModal } = props;
   const [services, setServices] = React.useState<Service[]>([]);
   const [activeSvc, setActiveSvc] = React.useState(-1);
   const [showAddService, setShowAddService] = React.useState(false);
+  const [deleteServiceId, setDeleteServiceId] = React.useState<number | null>(
+    null
+  );
+  const [deleteServiceIcon, setDeleteServiceIcon] = React.useState<number | null>(
+    null
+  );
+  const [snackbar, setSnackbar] = React.useState<SnackbarProps>({
+    open: false,
+    type: "success",
+    message: "",
+  });
 
   const updateService = React.useCallback(
     async (
@@ -60,11 +76,17 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
               : service
           )
         );
-
-        console.log(`Service ${field} updated successfully`);
+        setSnackbar({
+          open: true,
+          type: "success",
+          message: "Service updated successfully.",
+        });
       } catch (error) {
-        console.error(`Failed to update service ${field}:`, error);
-        alert(`Failed to update ${field}.`);
+        setSnackbar({
+          open: true,
+          type: "error",
+          message: `Failed to update ${field}.`,
+        });
       }
     },
     []
@@ -102,10 +124,17 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
           )
         );
 
-        console.log("Service image replaced successfully");
+        setSnackbar({
+          open: true,
+          type: "success",
+          message: "Service image replaced successfully,",
+        });
       } catch (error) {
-        console.error("Service image replacement error:", error);
-        alert("Failed to replace service image.");
+        setSnackbar({
+          open: true,
+          type: "error",
+          message: "Failed to replace service image.",
+        });
       }
     },
     []
@@ -136,16 +165,15 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
         )
       );
     } catch (error) {
-      console.error("Error replacing service icon:", error);
-      alert("Failed to replace service icon.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Failed to replace service icon.",
+      });
     }
   };
 
   const removeServiceIcon = async (serviceId: number) => {
-    if (!window.confirm("Remove this service icon?")) {
-      return;
-    }
-
     try {
       const formData = new FormData();
       formData.append("removeIcon", "true");
@@ -170,8 +198,11 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
         )
       );
     } catch (error) {
-      console.error("Error removing service icon:", error);
-      alert("Failed to remove service icon.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Failed to remove service icon.",
+      });
     }
   };
 
@@ -212,23 +243,22 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
         }));
       });
 
-      alert("Service added successfully!");
+      setSnackbar({
+        open: true,
+        type: "success",
+        message: "Service added successfully.",
+      });
     } catch (error) {
-      console.error("Error adding service:", error);
-      alert("Failed to add service.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Failed to add service.",
+      });
       throw error;
     }
   };
 
   const deleteService = async (serviceId: number) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this service? This cannot be undone."
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     try {
       const response = await fetch(
         `${API_ENDPOINT}/api/services/${serviceId}`,
@@ -256,9 +286,17 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
 
       // Close the service if it was open
       setActiveSvc(-1);
+      setSnackbar({
+        open: true,
+        type: "success",
+        message: "Service deleted successfully.",
+      });
     } catch (error) {
-      console.error("Error deleting service:", error);
-      alert("Failed to delete service.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Failed to delete service.",
+      });
     }
   };
 
@@ -282,7 +320,6 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
 
         setServices(formattedServices);
       } catch (error) {
-        console.error("Error fetching services:", error);
       }
     };
 
@@ -292,6 +329,55 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
   return (
     <div className="max-w-5xl mx-auto px-6">
       <SectionLabel text="What We Do" />
+      <Snackbar
+        open={snackbar.open}
+        type={snackbar.type}
+        message={snackbar.message}
+        onClose={() =>
+          setSnackbar((current) => ({
+            ...current,
+            open: false,
+          }))
+        }
+      />
+      <Snackbar
+        open={deleteServiceId !== null}
+        type="warning"
+        message="Are you sure you want to delete this service? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={() => {
+          if (deleteServiceId !== null) {
+            deleteService(deleteServiceId);
+          }
+          setDeleteServiceId(null);
+        }}
+        onCancel={() => {
+          setDeleteServiceId(null);
+        }}
+        onClose={() => {
+          setDeleteServiceId(null);
+        }}
+      />
+      <Snackbar
+        open={deleteServiceIcon !== null}
+        type="warning"
+        message="Are you sure you want to remove this icon? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={() => {
+          if (deleteServiceIcon !== null) {
+            removeServiceIcon(deleteServiceIcon);
+          }
+          setDeleteServiceIcon(null);
+        }}
+        onCancel={() => {
+          setDeleteServiceIcon(null);
+        }}
+        onClose={() => {
+          setDeleteServiceIcon(null);
+        }}
+      />
       {showAddService && (
         <AddService
           onClose={() => setShowAddService(false)}
@@ -479,7 +565,7 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
                           {s.icon && (
                             <button
                               type="button"
-                              onClick={() => removeServiceIcon(s.id)}
+                              onClick={() => setDeleteServiceIcon(s.id)}
                               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 text-gray-600 text-xs font-bold hover:bg-gray-100 transition"
                             >
                               <Trash2 size={13} />
@@ -496,7 +582,8 @@ export const Service: React.FC<{isAdmin: boolean, setShowModal: (show: boolean) 
                     <div className="sm:w-36 shrink-0 flex items-start justify-end">
                       <button
                         type="button"
-                        onClick={() => deleteService(s.id)}
+                        // onClick={() => deleteService(s.id)}
+                        onClick={() => setDeleteServiceId(s.id)}
                         className="inline-flex items-center gap-2 px-2 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 transition"
                       >
                         <Trash2 size={13} />

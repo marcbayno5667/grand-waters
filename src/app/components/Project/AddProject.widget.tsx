@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Plus, X } from "lucide-react";
+import { SnackbarProps } from "../Snackbar/Snackbar";
+import Snackbar from "../Snackbar/Snackbar.widget";
 
 export const AddProject = ({
   onClose,
@@ -18,46 +20,49 @@ export const AddProject = ({
   const [description, setDescription] = React.useState("");
   const [location, setLocation] = React.useState("");
   const [category, setCategory] = React.useState("FILTRATION");
-
   const [photos, setPhotos] = React.useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = React.useState<string[]>([]);
-
   const [saving, setSaving] = React.useState(false);
+  const [snackbar, setSnackbar] = React.useState<SnackbarProps>({
+    open: false,
+    type: "success",
+    message: "",
+  });
 
   // ==========================================
   // PHOTO SELECTION
   // ==========================================
 
-  const handlePhotosChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handlePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
 
     if (files.length === 0) return;
 
     if (files.length > 10) {
-      alert("You can upload a maximum of 10 photos.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "You can upload a maximum of 10 photos.",
+      });
       return;
     }
 
     // Check file sizes
-    const oversizedFile = files.find(
-      (file) => file.size > 5 * 1024 * 1024
-    );
+    const oversizedFile = files.find((file) => file.size > 5 * 1024 * 1024);
 
     if (oversizedFile) {
-      alert(
-        `"${oversizedFile.name}" is larger than 5 MB.`
-      );
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: `"${oversizedFile.name}" is larger than 5 MB.`,
+      });
       return;
     }
 
     setPhotos(files);
 
     // Create previews
-    const previews = files.map((file) =>
-      URL.createObjectURL(file)
-    );
+    const previews = files.map((file) => URL.createObjectURL(file));
 
     setPhotoPreviews(previews);
   };
@@ -67,9 +72,7 @@ export const AddProject = ({
   // ==========================================
 
   const removePhoto = (index: number) => {
-    setPhotos((current) =>
-      current.filter((_, i) => i !== index)
-    );
+    setPhotos((current) => current.filter((_, i) => i !== index));
 
     setPhotoPreviews((current) => {
       const url = current[index];
@@ -86,33 +89,51 @@ export const AddProject = ({
   // SUBMIT
   // ==========================================
 
-  const handleSubmit = async (
-    e: React.FormEvent
-  ) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim()) {
-      alert("Please enter a project title.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Please enter a project title.",
+      });
       return;
     }
 
     if (!description.trim()) {
-      alert("Please enter a project description.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Please enter a project description.",
+      });
       return;
     }
 
     if (!location.trim()) {
-      alert("Please enter the project location.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Please enter the project location..",
+      });
       return;
     }
 
     if (!category) {
-      alert("Please select a project category.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Please enter a project category.",
+      });
       return;
     }
 
     if (photos.length === 0) {
-      alert("Please select at least one project photo.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Please select at least one project photo.",
+      });
       return;
     }
 
@@ -140,9 +161,7 @@ export const AddProject = ({
 
   React.useEffect(() => {
     return () => {
-      photoPreviews.forEach((url) =>
-        URL.revokeObjectURL(url)
-      );
+      photoPreviews.forEach((url) => URL.revokeObjectURL(url));
     };
   }, []);
 
@@ -151,6 +170,18 @@ export const AddProject = ({
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
       onClick={onClose}
     >
+      <Snackbar
+        open={snackbar.open}
+        type={snackbar.type}
+        message={snackbar.message}
+        onClose={() =>
+          setSnackbar((current) => ({
+            ...current,
+            open: false,
+          }))
+        }
+      />
+
       <div
         className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -182,7 +213,6 @@ export const AddProject = ({
 
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-5">
-
             {/* TITLE */}
 
             <div>
@@ -193,9 +223,7 @@ export const AddProject = ({
               <input
                 type="text"
                 value={title}
-                onChange={(e) =>
-                  setTitle(e.target.value)
-                }
+                onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Industrial Filtration System"
                 className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb]"
               />
@@ -204,7 +232,6 @@ export const AddProject = ({
             {/* CATEGORY + LOCATION */}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
               {/* CATEGORY */}
 
               <div>
@@ -214,22 +241,14 @@ export const AddProject = ({
 
                 <select
                   value={category}
-                  onChange={(e) =>
-                    setCategory(e.target.value)
-                  }
+                  onChange={(e) => setCategory(e.target.value)}
                   className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-900 bg-white focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb]"
                 >
-                  <option value="FILTRATION">
-                    FILTRATION
-                  </option>
+                  <option value="FILTRATION">FILTRATION</option>
 
-                  <option value="RO SYSTEM">
-                    RO SYSTEM
-                  </option>
+                  <option value="RO SYSTEM">RO SYSTEM</option>
 
-                  <option value="SOFTENER">
-                    SOFTENER
-                  </option>
+                  <option value="SOFTENER">SOFTENER</option>
                 </select>
               </div>
 
@@ -243,14 +262,11 @@ export const AddProject = ({
                 <input
                   type="text"
                   value={location}
-                  onChange={(e) =>
-                    setLocation(e.target.value)
-                  }
+                  onChange={(e) => setLocation(e.target.value)}
                   placeholder="e.g. Cebu City"
                   className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb]"
                 />
               </div>
-
             </div>
 
             {/* DESCRIPTION */}
@@ -262,9 +278,7 @@ export const AddProject = ({
 
               <textarea
                 value={description}
-                onChange={(e) =>
-                  setDescription(e.target.value)
-                }
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe this project..."
                 rows={5}
                 className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-600 leading-relaxed resize-none focus:outline-none focus:border-[#1558cb] focus:ring-1 focus:ring-[#1558cb]"
@@ -286,61 +300,48 @@ export const AddProject = ({
 
               <label className="block cursor-pointer">
                 <div className="min-h-36 rounded-xl border-2 border-dashed border-gray-200 hover:border-[#1558cb] transition bg-gray-50 p-3">
-
                   {photoPreviews.length > 0 ? (
                     <div className="grid grid-cols-4 gap-2">
+                      {photoPreviews.map((preview, index) => (
+                        <div
+                          key={preview}
+                          className="relative aspect-square rounded-lg overflow-hidden group"
+                        >
+                          <img
+                            src={preview}
+                            alt={`Project photo ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
 
-                      {photoPreviews.map(
-                        (preview, index) => (
-                          <div
-                            key={preview}
-                            className="relative aspect-square rounded-lg overflow-hidden group"
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removePhoto(index);
+                            }}
+                            className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 hover:bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
                           >
-                            <img
-                              src={preview}
-                              alt={`Project photo ${
-                                index + 1
-                              }`}
-                              className="w-full h-full object-cover"
-                            />
+                            <X size={12} />
+                          </button>
 
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                removePhoto(index);
-                              }}
-                              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 hover:bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-                            >
-                              <X size={12} />
-                            </button>
-
-                            {index === 0 && (
-                              <span className="absolute bottom-1 left-1 bg-[#1558cb] text-white text-[8px] font-bold px-1.5 py-0.5 rounded">
-                                COVER
-                              </span>
-                            )}
-                          </div>
-                        )
-                      )}
+                          {index === 0 && (
+                            <span className="absolute bottom-1 left-1 bg-[#1558cb] text-white text-[8px] font-bold px-1.5 py-0.5 rounded">
+                              COVER
+                            </span>
+                          )}
+                        </div>
+                      ))}
 
                       {photos.length < 10 && (
                         <div className="aspect-square rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center">
-                          <Plus
-                            size={20}
-                            className="text-gray-400"
-                          />
+                          <Plus size={20} className="text-gray-400" />
                         </div>
                       )}
-
                     </div>
                   ) : (
                     <div className="h-28 flex flex-col items-center justify-center text-center">
-                      <Plus
-                        size={26}
-                        className="text-gray-400 mb-2"
-                      />
+                      <Plus size={26} className="text-gray-400 mb-2" />
 
                       <p className="text-xs font-bold text-gray-500">
                         Choose Project Photos
@@ -351,7 +352,6 @@ export const AddProject = ({
                       </p>
                     </div>
                   )}
-
                 </div>
 
                 <input
@@ -367,13 +367,11 @@ export const AddProject = ({
                 The first photo will be used as the project cover.
               </p>
             </div>
-
           </div>
 
           {/* FOOTER */}
 
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-
             <button
               type="button"
               onClick={onClose}
@@ -388,11 +386,8 @@ export const AddProject = ({
               disabled={saving}
               className="px-5 py-2.5 rounded-lg bg-[#1558cb] text-white text-sm font-bold hover:bg-[#1049a8] transition disabled:opacity-50"
             >
-              {saving
-                ? "Creating..."
-                : "Create Project"}
+              {saving ? "Creating..." : "Create Project"}
             </button>
-
           </div>
         </form>
       </div>

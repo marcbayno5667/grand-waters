@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Plus } from "lucide-react";
+import { SnackbarProps } from "../Snackbar/Snackbar";
+import Snackbar from "../Snackbar/Snackbar.widget";
 
 export const AddService = ({
   onClose,
@@ -15,6 +17,11 @@ export const AddService = ({
 }) => {
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
+  const [snackbar, setSnackbar] = React.useState<SnackbarProps>({
+    open: false,
+    type: "success",
+    message: "",
+  });
 
   const [image, setImage] = React.useState<File | null>(null);
   const [icon, setIcon] = React.useState<File | null>(null);
@@ -46,17 +53,29 @@ export const AddService = ({
     e.preventDefault();
 
     if (!title.trim()) {
-      alert("Please enter a service title.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Please enter title.",
+      });
       return;
     }
 
     if (!description.trim()) {
-      alert("Please enter a service description.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Please enter description.",
+      });
       return;
     }
 
     if (!image) {
-      alert("Please select a service image.");
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Please add image.",
+      });
       return;
     }
 
@@ -67,7 +86,6 @@ export const AddService = ({
 
       onClose();
     } catch (error) {
-      console.error(error);
     } finally {
       setSaving(false);
     }
@@ -78,6 +96,17 @@ export const AddService = ({
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
       onClick={onClose}
     >
+      <Snackbar
+        open={snackbar.open}
+        type={snackbar.type}
+        message={snackbar.message}
+        onClose={() =>
+          setSnackbar((current) => ({
+            ...current,
+            open: false,
+          }))
+        }
+      />
       <div
         className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -242,4 +271,4 @@ export const AddService = ({
   );
 };
 
-export default AddService
+export default AddService;

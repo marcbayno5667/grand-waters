@@ -2,6 +2,8 @@ import * as React from "react";
 import { MapPin, Pencil, Trash2, ImagePlus, ArrowRight, X } from "lucide-react";
 import { API_ENDPOINT } from "@/app/utils/constants";
 import { SectionLabel } from "@/app/utils/services";
+import { SnackbarProps } from "../Snackbar/Snackbar";
+import { Snackbar } from "../Snackbar/Snackbar.widget";
 import AddProject from "./AddProject.widget";
 
 interface ProjectData {
@@ -257,16 +259,19 @@ function ProjectEditModal({
 export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
   const [projects, setProjects] = React.useState<ProjectData[]>([]);
   const [showAddProject, setShowAddProject] = React.useState(false);
-
   const [selectedProject, setSelectedProject] =
     React.useState<ProjectData | null>(null);
-
   const [editingProject, setEditingProject] =
     React.useState<ProjectData | null>(null);
-
   const [loading, setLoading] = React.useState(true);
-
-  const [error, setError] = React.useState<string | null>(null);
+  const [deleteProjectId, setDeleteProjectId] = React.useState<number | null>(
+    null
+  );
+  const [snackbar, setSnackbar] = React.useState<SnackbarProps>({
+    open: false,
+    type: "success",
+    message: "",
+  });
 
   // ==========================================
   // GET PROJECTS
@@ -275,7 +280,7 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
   const loadProjects = React.useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
+      // setError(null);
 
       const response = await fetch(`${API_ENDPOINT}/api/projects`);
 
@@ -287,9 +292,9 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 
       setProjects(result.projects || []);
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to load projects"
-      );
+      // setError(
+      //   error instanceof Error ? error.message : "Failed to load projects"
+      // );
     } finally {
       setLoading(false);
     }
@@ -325,6 +330,11 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
     }
 
     setProjects((current) => [...current, result.project]);
+    setSnackbar({
+      open: true,
+      type: "success",
+      message: "Project added successfully.",
+    });
   };
 
   React.useEffect(() => {
@@ -365,11 +375,17 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 
       setEditingProject(null);
 
-      alert("Project updated successfully.");
+      setSnackbar({
+        open: true,
+        type: "success",
+        message: "Project updated successfully.",
+      });
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Failed to update project"
-      );
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Failed to update project.",
+      });
     }
   };
 
@@ -377,14 +393,10 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
   // DELETE PROJECT
   // ==========================================
 
-  const removeProject = async (project: ProjectData) => {
-    if (!window.confirm("Remove this project?")) {
-      return;
-    }
-
+  const removeProject = async (projectId: number) => {
     try {
       const response = await fetch(
-        `${API_ENDPOINT}/api/projects/${project.id}`,
+        `${API_ENDPOINT}/api/projects/${projectId}`,
         {
           method: "DELETE",
         }
@@ -397,18 +409,24 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
       }
 
       setProjects((currentProjects) =>
-        currentProjects.filter((item) => item.id !== project.id)
+        currentProjects.filter((item) => item.id !== projectId)
       );
 
-      if (selectedProject?.id === project.id) {
+      if (selectedProject?.id === projectId) {
         setSelectedProject(null);
       }
 
-      alert("Project deleted successfully.");
+      setSnackbar({
+        open: true,
+        type: "success",
+        message: "Project deleted successfully.",
+      });
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Failed to delete project"
-      );
+      setSnackbar({
+        open: true,
+        type: "error",
+        message: "Failed to delete project",
+      });
     }
   };
 
@@ -421,14 +439,22 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
       if (files.length === 0) return;
 
       if (files.length > 10) {
-        alert("You can upload a maximum of 10 photos.");
+        setSnackbar({
+          open: true,
+          type: "warning",
+          message: "You can upload a maximum of 10 photos.",
+        });
         return;
       }
 
       // Check file sizes
       for (const file of files) {
         if (file.size > 5 * 1024 * 1024) {
-          alert(`${file.name} is larger than 5MB.`);
+          setSnackbar({
+            open: true,
+            type: "warning",
+            message: `${file.name} is larger than 5MB.`,
+          });
           return;
         }
       }
@@ -467,17 +493,22 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
         )
       );
 
-      alert(
-        `Successfully replaced project photos with ${files.length} new photo${
-          files.length > 1 ? "s" : ""
-        }.`
-      );
+      setSnackbar({
+        open: true,
+        type: "success",
+        message: `Successfully replaced project photos with ${
+          files.length
+        } new photo${files.length > 1 ? "s" : ""}.`,
+      });
     } catch (error) {
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to replace project photos."
-      );
+      setSnackbar({
+        open: true,
+        type: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to replace project photos.",
+      });
     }
   };
 
@@ -504,42 +535,43 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
   }
 
   // ==========================================
-  // ERROR
-  // ==========================================
-
-  if (error) {
-    return (
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="mb-10">
-          <SectionLabel text="Our Work" />
-
-          <h2 className="font-black text-3xl lg:text-4xl text-gray-900">
-            Projects
-          </h2>
-        </div>
-
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-          <p className="text-sm text-red-600 mb-4">Failed to load projects.</p>
-
-          <p className="text-xs text-red-400 mb-4">{error}</p>
-
-          <button
-            onClick={loadProjects}
-            className="bg-[#1558cb] text-white px-4 py-2 rounded-lg text-sm font-bold"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
   // MAIN UI
   // ==========================================
 
   return (
     <>
+      <Snackbar
+        open={snackbar.open}
+        type={snackbar.type}
+        message={snackbar.message}
+        onClose={() =>
+          setSnackbar((current) => ({
+            ...current,
+            open: false,
+          }))
+        }
+      />
+
+      <Snackbar
+        open={deleteProjectId !== null}
+        type="warning"
+        message="Are you sure you want to delete this project? All project photos will also be permanently deleted."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={() => {
+          if (deleteProjectId !== null) {
+            removeProject(deleteProjectId);
+          }
+
+          setDeleteProjectId(null);
+        }}
+        onCancel={() => {
+          setDeleteProjectId(null);
+        }}
+        onClose={() => {
+          setDeleteProjectId(null);
+        }}
+      />
       {/* VIEW PROJECT MODAL */}
 
       {selectedProject && (
@@ -668,7 +700,8 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeProject(project);
+                      // removeProject(project);
+                      setDeleteProjectId(project.id);
                     }}
                     className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow transition-colors"
                   >
