@@ -276,7 +276,9 @@ export default function App() {
   const [services, setServices] = React.useState<ServiceData[]>([]);
 
   const logout = () => {
-    localStorage.removeItem("gw_admin");
+    localStorage.removeItem("gw_access_token");
+    localStorage.removeItem("gw_refresh_token");
+  
     setIsAdmin(false);
   };
 
