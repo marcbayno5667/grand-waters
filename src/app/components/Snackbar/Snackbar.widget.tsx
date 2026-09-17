@@ -39,7 +39,7 @@ export const Snackbar = ({
 
       setTimeout(() => {
         onClose && onClose();
-      }, 200);
+      }, 150);
     }, duration);
 
     return () => clearTimeout(timer);

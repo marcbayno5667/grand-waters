@@ -11,31 +11,24 @@ import { API_ENDPOINT } from "../../utils/constants";
 import { SectionLabel, EditableImage } from "../../utils/services";
 import { SnackbarProps } from "../Snackbar/Snackbar";
 import Snackbar from "../Snackbar/Snackbar.widget";
+import { ServiceData } from "./Service";
 import AddService from "./AddService.widget";
-
-interface Service {
-  id: number;
-  title: string;
-  description: string;
-  icon?: string | null;
-  image?: string | null;
-  num: string;
-}
 
 export const Service: React.FC<{
   isAdmin: boolean;
   setShowModal: (show: boolean) => void;
+  extractServices: (data: ServiceData[]) => void;
 }> = (props) => {
-  const { isAdmin, setShowModal } = props;
-  const [services, setServices] = React.useState<Service[]>([]);
+  const { isAdmin, setShowModal, extractServices } = props;
+  const [services, setServices] = React.useState<ServiceData[]>([]);
   const [activeSvc, setActiveSvc] = React.useState(-1);
   const [showAddService, setShowAddService] = React.useState(false);
   const [deleteServiceId, setDeleteServiceId] = React.useState<number | null>(
     null
   );
-  const [deleteServiceIcon, setDeleteServiceIcon] = React.useState<number | null>(
-    null
-  );
+  const [deleteServiceIcon, setDeleteServiceIcon] = React.useState<
+    number | null
+  >(null);
   const [snackbar, setSnackbar] = React.useState<SnackbarProps>({
     open: false,
     type: "success",
@@ -311,16 +304,9 @@ export const Service: React.FC<{
 
         const data = await response.json();
 
-        const formattedServices: Service[] = data.services.map(
-          (service: Omit<Service, "num">, index: number) => ({
-            ...service,
-            num: String(index + 1).padStart(2, "0"),
-          })
-        );
-
-        setServices(formattedServices);
-      } catch (error) {
-      }
+        setServices(data.services);
+        extractServices(data.services);
+      } catch (error) {}
     };
 
     loadServices();

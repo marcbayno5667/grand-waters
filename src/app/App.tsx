@@ -15,12 +15,14 @@ import {
   Menu,
   X,
   Lock,
-  LogOut
+  LogOut,
 } from "lucide-react";
 import { API_ENDPOINT } from "./utils/constants";
 import { SectionLabel, EditableImage } from "./utils/services";
+import { ServiceData } from "./components/Service/Service";
 import ServiceComponent from "./components/Service/Service.widget";
 import ProjectComponent from "./components/Project/Project.widget";
+import StatsComponent from "./components/Stats/Stats.widget";
 
 const NAV_LINKS = ["Home", "Services", "Projects", "About Us"];
 const NAV_HREFS: Record<string, string> = {
@@ -52,13 +54,6 @@ const WHY = [
     title: "100% Satisfaction",
     desc: "We stand behind every installation and repair.",
   },
-];
-
-const STATS = [
-  { value: "2,500+", label: "Happy Clients" },
-  { value: "3,800+", label: "Projects Done" },
-  { value: "10+", label: "Years Active" },
-  { value: "24/7", label: "Emergency Line" },
 ];
 
 function InquiryModal({ onClose }: { onClose: () => void }) {
@@ -387,31 +382,7 @@ export default function App() {
   );
   const [showAdminLogin, setShowAdminLogin] = React.useState(false);
   const [imgStore, setImgStore] = React.useState<Record<string, string>>({});
-
-  const [statsOverrides, setStatsOverrides] = React.useState<
-    Record<number, { value: string; label: string }>
-  >(() => {
-    try {
-      return JSON.parse(localStorage.getItem("gw_stats") ?? "{}");
-    } catch {
-      return {};
-    }
-  });
-
-  const saveStat = (i: number, field: "value" | "label", val: string) => {
-    setStatsOverrides((prev) => {
-      const next = {
-        ...prev,
-        [i]: {
-          value: prev[i]?.value ?? STATS[i].value,
-          label: prev[i]?.label ?? STATS[i].label,
-          [field]: val,
-        },
-      };
-      localStorage.setItem("gw_stats", JSON.stringify(next));
-      return next;
-    });
-  };
+  const [services, setServices] = React.useState<ServiceData[]>([]);
 
   const login = async (u: string, p: string) => {
     try {
@@ -444,8 +415,7 @@ export default function App() {
             ...prev,
             "hero-bg": `${coverUrl}?t=${Date.now()}`,
           }));
-        } catch (error) {
-        }
+        } catch (error) {}
       };
 
       if (response.ok) {
@@ -493,8 +463,7 @@ export default function App() {
           ...prev,
           "hero-bg": coverUrl,
         }));
-      } catch (error) {
-      }
+      } catch (error) {}
     };
 
     loadCoverPhoto();
@@ -553,7 +522,7 @@ export default function App() {
       }`}
     >
       {showModal && <InquiryModal onClose={() => setShowModal(false)} />}
-   
+
       {showAdminLogin && (
         <AdminLoginModal
           onLogin={login}
@@ -763,76 +732,20 @@ export default function App() {
       </section>
 
       <section id="services" className="py-20 bg-white">
-        <ServiceComponent isAdmin={isAdmin} setShowModal={setShowModal} />
+        <ServiceComponent
+          isAdmin={isAdmin}
+          setShowModal={setShowModal}
+          extractServices={setServices}
+        />
       </section>
 
       {/* Grand Waters background banner */}
       <section className="relative py-24 overflow-hidden">
-        <img
-          src={imgE}
-          alt="Grand Waters facility"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(5,10,28,0.88) 0%, rgba(21,88,203,0.70) 100%)",
-          }}
-        />
-        <div className="relative max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <p className="text-[#4e8ef7] text-[11px] font-bold tracking-[0.3em] uppercase mb-3">
-              Trusted Since 2012
-            </p>
-            <h2 className="font-black text-white text-3xl lg:text-5xl leading-tight">
-              Grand Waters by the Numbers
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {STATS.map((s, i) => {
-              const value = statsOverrides[i]?.value ?? s.value;
-              const label = statsOverrides[i]?.label ?? s.label;
-              return (
-                <div
-                  key={i}
-                  className="text-center px-4 py-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm"
-                >
-                  {isAdmin ? (
-                    <div className="space-y-2">
-                      <input
-                        value={value}
-                        onChange={(e) => saveStat(i, "value", e.target.value)}
-                        className="w-full text-center font-black text-3xl bg-transparent border-b border-[#4e8ef7]/60 focus:border-[#4e8ef7] focus:outline-none text-[#4e8ef7] pb-1 transition"
-                      />
-                      <input
-                        value={label}
-                        onChange={(e) => saveStat(i, "label", e.target.value)}
-                        className="w-full text-center text-sm bg-transparent border-b border-white/20 focus:border-white/60 focus:outline-none text-gray-300 pb-1 transition"
-                      />
-                    </div>
-                  ) : (
-                    <>
-                      <div
-                        className="font-black text-4xl lg:text-5xl mb-2"
-                        style={{ color: "#4e8ef7" }}
-                      >
-                        {value}
-                      </div>
-                      <div className="text-gray-300 text-sm font-medium">
-                        {label}
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <StatsComponent isAdmin={isAdmin}/>
       </section>
 
       <section id="projects" className="py-20 bg-[#f8f9fb]">
-        <ProjectComponent isAdmin={isAdmin}/>
+        <ProjectComponent isAdmin={isAdmin} />
       </section>
 
       <section id="about" className="py-20 bg-white">
@@ -938,19 +851,13 @@ export default function App() {
                 Services
               </h4>
               <ul className="space-y-2.5 text-xs">
-                {[
-                  "Water Filtration Installation",
-                  "Water Softener Installation",
-                  "Reverse Osmosis Systems",
-                  "Tank & System Cleaning",
-                  "Water Testing & Consultation",
-                ].map((s) => (
-                  <li key={s}>
+                {services.map((s) => (
+                  <li key={s.id}>
                     <a
                       href="#services"
                       className="hover:text-white transition-colors"
                     >
-                      {s}
+                      {s.title}
                     </a>
                   </li>
                 ))}
