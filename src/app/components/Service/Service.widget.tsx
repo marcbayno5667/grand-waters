@@ -49,7 +49,7 @@ export const Service: React.FC<{
           `${API_ENDPOINT}/api/services/${serviceId}`,
           {
             method: "PATCH",
-            headers: API_HEADER,
+            headers: API_HEADER(),
             body: formData,
           }
         );
@@ -97,7 +97,7 @@ export const Service: React.FC<{
           `${API_ENDPOINT}/api/services/${serviceId}`,
           {
             method: "PATCH",
-            headers: API_HEADER,
+            headers: API_HEADER(),
             body: formData,
           }
         );
@@ -144,7 +144,7 @@ export const Service: React.FC<{
         `${API_ENDPOINT}/api/services/${serviceId}`,
         {
           method: "PATCH",
-          headers: API_HEADER,
+          headers: API_HEADER(),
           body: formData,
         }
       );
@@ -178,7 +178,7 @@ export const Service: React.FC<{
         `${API_ENDPOINT}/api/services/${serviceId}`,
         {
           method: "PATCH",
-          headers: API_HEADER,
+          headers: API_HEADER(),
           body: formData,
         }
       );
@@ -227,7 +227,7 @@ export const Service: React.FC<{
 
       const response = await fetch(`${API_ENDPOINT}/api/services`, {
         method: "POST",
-        headers: API_HEADER,
+        headers: API_HEADER(),
         body: formData,
       });
 
@@ -267,7 +267,7 @@ export const Service: React.FC<{
         `${API_ENDPOINT}/api/services/${serviceId}`,
         {
           method: "DELETE",
-          headers: API_HEADER,
+          headers: API_HEADER(),
         }
       );
 
@@ -454,10 +454,10 @@ export const Service: React.FC<{
               </button>
 
               {open && (
-                <div className="flex flex-col sm:flex-row gap-5 pb-7 pl-16">
+                <div className="flex flex-col sm:flex-row gap-5 pb-7 pl-0 sm:pl-16">
                   {/* IMAGE */}
                   <div
-                    className="sm:w-52 shrink-0 rounded-xl overflow-hidden"
+                    className="w-full sm:w-52 shrink-0 rounded-xl overflow-hidden"
                     style={{ height: "140px" }}
                   >
                     <EditableImage
@@ -474,7 +474,6 @@ export const Service: React.FC<{
 
                   {/* TITLE + DESCRIPTION + SERVICE ICON */}
                   <div className="flex-1 min-w-0">
-                    {/* YOUR EXISTING TITLE/DESCRIPTION CODE */}
                     {isAdmin ? (
                       <div className="space-y-2">
                         <div>
@@ -532,15 +531,16 @@ export const Service: React.FC<{
                       </>
                     )}
 
-                    {/* SERVICE ICON — KEEP IT HERE */}
+                    {/* ADMIN CONTROLS */}
                     {isAdmin && (
-                      <div className="mt-2 border-t border-gray-100">
+                      <div className="mt-3 pt-3 border-t border-gray-100">
                         <label className="block text-[10px] font-bold text-[#1558cb] uppercase tracking-widest mb-2">
                           Service Icon
                         </label>
 
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 text-[#1558cb] text-xs font-bold cursor-pointer hover:bg-blue-100 transition">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* REPLACE ICON */}
+                          <label className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-50 text-[#1558cb] text-xs font-bold cursor-pointer hover:bg-blue-100 transition">
                             <Pencil size={13} />
                             Replace Icon
                             <input
@@ -559,35 +559,41 @@ export const Service: React.FC<{
                             />
                           </label>
 
+                          {/* REMOVE ICON */}
                           {s.icon && (
                             <button
                               type="button"
                               onClick={() => setDeleteServiceIcon(s.id)}
-                              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 text-gray-600 text-xs font-bold hover:bg-gray-100 transition"
+                              className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-50 text-gray-600 text-xs font-bold hover:bg-gray-100 transition"
                             >
                               <Trash2 size={13} />
                               Remove Icon
                             </button>
                           )}
+
+                          {/* DELETE SERVICE */}
+                          <button
+                            type="button"
+                            onClick={() => setDeleteServiceId(s.id)}
+                            className="
+                              w-full sm:w-auto
+                              sm:ml-auto
+                              inline-flex items-center justify-center gap-2
+                              px-3 py-2
+                              rounded-lg
+                              bg-red-50 text-red-600
+                              text-xs font-bold
+                              hover:bg-red-100
+                              transition
+                            "
+                          >
+                            <Trash2 size={13} />
+                            Delete Service
+                          </button>
                         </div>
                       </div>
                     )}
                   </div>
-
-                  {/* THIRD COLUMN — DELETE ONLY */}
-                  {isAdmin && (
-                    <div className="sm:w-36 shrink-0 flex items-start justify-end">
-                      <button
-                        type="button"
-                        // onClick={() => deleteService(s.id)}
-                        onClick={() => setDeleteServiceId(s.id)}
-                        className="inline-flex items-center gap-2 px-2 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-bold hover:bg-red-100 transition"
-                      >
-                        <Trash2 size={13} />
-                        Delete Service
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
             </div>

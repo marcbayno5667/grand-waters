@@ -39,7 +39,6 @@ export const Login = ({
 
       if (data.success && data.session?.access_token) {
         localStorage.setItem("gw_access_token", data.session.access_token);
-
         localStorage.setItem("gw_refresh_token", data.session.refresh_token);
 
         setIsAdmin(true);

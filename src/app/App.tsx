@@ -323,7 +323,7 @@ export default function App() {
 
         const response = await fetch(`${API_ENDPOINT}/api/cover-photo`, {
           method: "POST",
-          headers: API_HEADER,
+          headers: API_HEADER(),
           body: formData,
         });
 

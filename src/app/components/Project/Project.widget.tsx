@@ -320,7 +320,7 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 
     const response = await fetch(`${API_ENDPOINT}/api/projects`, {
       method: "POST",
-      headers: API_HEADER,
+      headers: API_HEADER(),
       body: formData,
     });
 
@@ -362,7 +362,7 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
         `${API_ENDPOINT}/api/projects/${updatedProject.id}`,
         {
           method: "PATCH",
-          headers: API_HEADER,
+          headers: API_HEADER(),
           body: formData,
         }
       );
@@ -401,7 +401,7 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
         `${API_ENDPOINT}/api/projects/${projectId}`,
         {
           method: "DELETE",
-          headers: API_HEADER,
+          headers: API_HEADER(),
         }
       );
 
@@ -479,7 +479,7 @@ export const Project: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
         `${API_ENDPOINT}/api/projects/${project.id}`,
         {
           method: "PATCH",
-          headers: API_HEADER,
+          headers: API_HEADER(),
           body: formData,
         }
       );

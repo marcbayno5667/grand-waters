@@ -109,7 +109,7 @@ export const Stat: React.FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
       const response = await fetch(`${API_ENDPOINT}/api/stats/${id}`, {
         method: "PATCH",
         headers: {
-          ...API_HEADER,
+          ...API_HEADER(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
